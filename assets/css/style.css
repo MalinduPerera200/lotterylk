@@ -1,0 +1,152 @@
+/* Custom styles for lotteryLK */
+
+/* Custom Fonts - Uncomment if you want to use custom fonts */
+/*
+@font-face {
+    font-family: 'Noto Sans Sinhala';
+    src: url('../fonts/NotoSansSinhala-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Noto Sans Sinhala';
+    src: url('../fonts/NotoSansSinhala-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Noto Sans Sinhala', Arial, sans-serif;
+}
+*/
+
+/* Custom animations */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Lottery ball styles */
+.lottery-ball {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 0 5px;
+}
+
+/* Latest results card hover effect */
+.result-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* WhatsApp button pulse effect */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(241, 196, 15, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(241, 196, 15, 0);
+    }
+}
+
+.whatsapp-btn {
+    animation: pulse 2s infinite;
+}
+
+/* Featured lottery animation */
+.featured-lottery {
+    position: relative;
+    overflow: hidden;
+}
+
+.featured-lottery::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    100% {
+        left: 100%;
+    }
+}
+
+/* News card styles */
+.news-card {
+    transition: transform 0.3s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+}
+
+.news-card img {
+    transition: transform 0.5s ease;
+}
+
+.news-card:hover img {
+    transform: scale(1.05);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0A3D62;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #1E8449;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .lottery-ball {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+}
