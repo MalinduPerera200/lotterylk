@@ -276,13 +276,14 @@ function format_winning_numbers($lottery_id, $winning_numbers_json)
                 isset($data['numbers']) && is_array($data['numbers']) && count($data['numbers']) == 4 &&
                 isset($data['special_number']) && is_numeric($data['special_number'])
             ) {
-                // ... (Mega Power display logic - keep leading zeros for its numbers as it's specific)
                 $html_output .= '<div class="flex flex-col items-center gap-1">';
                 $html_output .= '<div class="flex items-center gap-1.5">';
                 $html_output .= '<span class="lottery-ball bg-blue-500 text-white font-bold">' . htmlspecialchars($data['letter']) . '</span>';
-                if (isset($data['numbers'][0]) && is_numeric($data['numbers'][0])) $html_output .= '<span class="lottery-ball bg-red-500 text-white">' . sprintf("%02d", (int)$data['numbers'][0]) . '</span>';
+                if (isset($data['numbers'][0]) && is_numeric($data['numbers'][0]))
+                    $html_output .= '<span class="lottery-ball bg-red-500 text-white">' . sprintf("%02d", (int)$data['numbers'][0]) . '</span>';
                 for ($i = 1; $i < 4; $i++) {
-                    if (isset($data['numbers'][$i]) && is_numeric($data['numbers'][$i])) $html_output .= '<span class="lottery-ball bg-yellow-400 text-black">' . sprintf("%02d", (int)$data['numbers'][$i]) . '</span>';
+                    if (isset($data['numbers'][$i]) && is_numeric($data['numbers'][$i]))
+                        $html_output .= '<span class="lottery-ball bg-yellow-400 text-black">' . sprintf("%02d", (int)$data['numbers'][$i]) . '</span>';
                 }
                 $html_output .= '</div>';
                 $html_output .= '<div class="flex items-center gap-1.5 mt-1">';
@@ -293,12 +294,6 @@ function format_winning_numbers($lottery_id, $winning_numbers_json)
                 $html_output .= '<span class="text-red-600 text-xs">දත්ත දෝෂයකි (ID: ' . htmlspecialchars($lottery_id) . ')</span>';
             }
             break;
-
-        // ... (Dhana Nidhanaya, Handahana, Lagna Wasana, Kapruka - these often have single digit or specific displays, check if leading zero removal applies)
-        // For example, Handahana's Dhanayogaya and Daiwa Ankaya might be single digits naturally.
-        // Let's assume for these, we display numbers as they are (effectively removing leading zeros from input stage)
-        // or apply %02d if a two-digit display is always preferred for consistency in ball size.
-        // I will apply no-leading-zero for their numbers based on your general request for specific lotteries.
 
         case DHANA_NIDHANAYA_ID:
             $html_output .= '<div class="space-y-1 text-xs text-center">';
@@ -455,18 +450,24 @@ function format_currency($amount) {
  * @param string $draw_date Draw date (optional)
  * @return string WhatsApp URL
  */
-function generate_whatsapp_order_link($lottery_name, $draw_date = '') {
-    $phone = '+94771234567'; // Replace with your actual WhatsApp number
-    
+// WhatsApp හාඩ්කෝඩ් අංකය ඉවත් කර වෙනත් තැනක තබා ගන්න
+// includes/functions.php හි මෙම ෆංක්ෂන් එක යටතේ
+
+function generate_whatsapp_order_link($lottery_name, $draw_date = '')
+{
+    // වසම් අවසානයේ මෙය කොන්ෆිගරේශන් ලෙස ගන්න
+    global $config;
+    $phone = isset($config['whatsapp_number']) ? $config['whatsapp_number'] : '+94771234567';
+
     $message = "හෙලෝ, මට " . $lottery_name . " ලොතරැයිය ඇණවුම් කිරීමට අවශ්‍යයි";
-    
+
     if (!empty($draw_date)) {
         $message .= " - දිනුම් ඇදීම් දිනය: " . $draw_date;
     }
-    
+
     // URL encode the message
     $message = urlencode($message);
-    
+
     return "https://wa.me/{$phone}?text={$message}";
 }
 
@@ -527,3 +528,82 @@ function get_number_frequency($pdo, $lottery_id, $limit = 10) {
         return [];
     }
 }
+/**
+ * Generate CSRF token
+ * @return string Generated token
+ */
+function generate_csrf_token()
+{
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Verify CSRF token
+ * @param string $token Token to verify
+ * @return bool True if token is valid
+ */
+function verify_csrf_token($token)
+{
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+/**
+ * Validate and process uploaded image
+ * @param array $file $_FILES array element
+ * @param string $target_dir Directory to store uploads
+ * @param array $allowed_types Array of allowed MIME types
+ * @param int $max_size Maximum file size in bytes
+ * @return array Result array with status and message/path
+ */
+function validate_and_upload_image($file, $target_dir, $allowed_types = ['image/jpeg', 'image/png', 'image/gif'], $max_size = 2000000)
+{
+    $result = [
+        'success' => false,
+        'message' => '',
+        'path' => ''
+    ];
+
+    // Check if file exists and no errors occurred
+    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        $result['message'] = 'ගොනුව උඩුගත කිරීමේදී දෝෂයක් ඇති විය.';
+        return $result;
+    }
+
+    // Check file size
+    if ($file['size'] > $max_size) {
+        $result['message'] = 'ගොනුව විශාල වැඩියි. උපරිම ප්‍රමාණය: ' . ($max_size / 1000000) . 'MB.';
+        return $result;
+    }
+
+    // Check MIME type
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $file_mime = $finfo->file($file['tmp_name']);
+
+    if (!in_array($file_mime, $allowed_types)) {
+        $result['message'] = 'අවසර නැති ගොනු වර්ගයකි. අවසර ලත් වර්ග: ' . implode(', ', $allowed_types);
+        return $result;
+    }
+
+    // Create target directory if it doesn't exist
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0755, true);
+    }
+
+    // Generate unique filename
+    $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $unique_name = uniqid() . '.' . $file_extension;
+    $target_path = $target_dir . $unique_name;
+
+    // Try to move the uploaded file
+    if (move_uploaded_file($file['tmp_name'], $target_path)) {
+        $result['success'] = true;
+        $result['path'] = $target_path;
+    } else {
+        $result['message'] = 'ගොනුව උඩුගත කිරීමේදී දෝෂයක් ඇති විය.';
+    }
+
+    return $result;
+}
+

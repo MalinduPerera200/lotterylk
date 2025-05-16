@@ -42,21 +42,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $check = getimagesize($_FILES['image']['tmp_name']);
         if ($check !== false) {
             // Check file size (limit to 2MB)
-            if ($_FILES['image']['size'] <= 2000000) {
-                // Allow only certain file formats
-                if ($file_extension == "jpg" || $file_extension == "png" || $file_extension == "jpeg" || $file_extension == "gif") {
-                    // Try to upload
-                    if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                        $form_data['image_path'] = '/lotterylk/assets/images/news/' . $unique_filename;
-                        $uploaded_image = true;
-                    } else {
-                        $upload_error = "සමාවන්න, ගොනුව උඩුගත කිරීමේදී දෝෂයක් ඇති විය.";
-                    }
+            // File upload handling
+            $uploaded_image = false;
+            if (isset($_FILES['image']) && $_FILES['image']['size'] > 0) {
+                $target_dir = "../assets/images/news/";
+                $upload_result = validate_and_upload_image($_FILES['image'], $target_dir);
+
+                if ($upload_result['success']) {
+                    $form_data['image_path'] = '/lotterylk/assets/images/news/' . basename($upload_result['path']);
+                    $uploaded_image = true;
                 } else {
-                    $upload_error = "සමාවන්න, JPG, JPEG, PNG & GIF ගොනු පමණක් අවසර ඇත.";
+                    $upload_error = $upload_result['message'];
                 }
-            } else {
-                $upload_error = "සමාවන්න, ඔබගේ ගොනුව විශාල වැඩිය. උපරිම ප්‍රමාණය 2MB වේ.";
             }
         } else {
             $upload_error = "සමාවන්න, ඔබගේ ගොනුව පින්තූරයක් නොවේ.";

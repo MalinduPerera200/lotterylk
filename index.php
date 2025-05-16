@@ -81,6 +81,7 @@ include 'includes/header.php';
                                 <h3 class="text-lg font-bold text-primaryBlue"><?php echo htmlspecialchars($result['lottery_name']); ?></h3>
                                 <p class="text-gray-500 text-xs"><?php echo format_date_sinhala($result['draw_date']); ?></p>
                             </div>
+
                             <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-white <?php echo (strtoupper($result['type']) == 'NLB') ? 'bg-primaryBlue' : 'bg-primaryGreen'; ?>">
                                 <?php echo htmlspecialchars($result['type']); ?>
                             </span>
@@ -130,9 +131,15 @@ include 'includes/header.php';
                 <?php foreach (array_slice($all_lotteries, 0, 8) as $lottery): // Show up to 8 featured lotteries 
                 ?>
                     <div class="bg-white rounded-lg shadow-md overflow-hidden featured-lottery h-full flex flex-col">
-                        <div class="h-32 bg-gradient-to-r <?php echo (strtoupper($lottery['type']) == 'NLB') ? 'from-primaryBlue to-blue-700' : 'from-primaryGreen to-green-700'; ?> flex items-center justify-center p-4 text-center">
-                            <h3 class="text-xl font-bold text-white"><?php echo htmlspecialchars($lottery['name']); ?></h3>
-                        </div>
+                        <?php if (!empty($lottery['image_path'])): ?>
+                            <div class="h-32 flex items-center justify-center p-4 text-center overflow-hidden">
+                                <img src="<?php echo htmlspecialchars($lottery['image_path']); ?>" alt="<?php echo htmlspecialchars($lottery['name']); ?>" class="w-full h-full object-contain">
+                            </div>
+                        <?php else: ?>
+                            <div class="h-32 bg-gradient-to-r <?php echo (strtoupper($lottery['type']) == 'NLB') ? 'from-primaryBlue to-blue-700' : 'from-primaryGreen to-green-700'; ?> flex items-center justify-center p-4 text-center">
+                                <h3 class="text-xl font-bold text-white"><?php echo htmlspecialchars($lottery['name']); ?></h3>
+                            </div>
+                        <?php endif; ?>
                         <div class="p-5 flex flex-col flex-grow">
                             <p class="text-gray-600 text-sm mb-3 flex-grow"><?php echo htmlspecialchars(shorten_text($lottery['description'], 70)); ?></p>
                             <p class="text-xs text-primaryBlue mb-4">

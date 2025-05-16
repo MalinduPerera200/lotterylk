@@ -1,14 +1,18 @@
 <?php
+
 /**
  * Database Connection Script
  * This file establishes a secure connection to the MySQL database using PDO
  */
 
-// Database configuration
-$host = 'localhost';
-$db = 'lotterylk_db';
-$user = 'root';   // Change to your MySQL username in production
-$pass = '';       // Change to your MySQL password in production
+// Include configuration file
+require_once 'config.php';
+
+// Database configuration - retrieve from config file instead of hardcoding
+$host = $config['db_host'] ?? 'localhost';
+$db = $config['db_name'] ?? 'lotterylk_db';
+$user = $config['db_user'] ?? 'root';   // Should be changed in production
+$pass = $config['db_pass'] ?? '';       // Should be changed in production
 $charset = 'utf8mb4';
 
 // Set DSN (Data Source Name)
@@ -24,19 +28,15 @@ $options = [
 // Try to establish connection
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
-    
+
     // Optional: Set a global variable to indicate successful connection
     $db_connected = true;
-    
 } catch (PDOException $e) {
     // Handle connection failure
-    // For development/debugging:
-    //echo "Connection failed: " . $e->getMessage();
-    
     // For production (safer, doesn't expose details):
     $error_message = "දත්ත සමුදාය සම්බන්ධතාවය අසාර්ථක විය. කරුණාකර පසුව නැවත උත්සාහ කරන්න.";
     $db_connected = false;
-    
+
     // Log error to file instead of displaying (for production)
     error_log("Database connection failed: " . $e->getMessage(), 0);
 }
